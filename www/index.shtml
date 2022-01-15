@@ -1,5 +1,5 @@
-<!doctype html>
-<html lang="en">
+<!doctype shtml>
+<shtml lang="en">
 <head>
   <meta charset="utf-8">
   <title>Hello world</title>
@@ -13,10 +13,16 @@
 </head>
 <body>
 	<div>
+    Hedllo
+    <p>Hedllo world</p>
+    <!--#element attribute=value attribute=value -->
 		<p>Hello world</p>
+    <!--#include file="" attribute=value -->
+    <!--#include file="" file="" -->
+    <!--#include file="" file=value -->
 	</div>
     <footer id="scriptComponents">
         <script src="js/scripts.js"></script>
     </footer>
 </body>
-</html>
+</shtml>
