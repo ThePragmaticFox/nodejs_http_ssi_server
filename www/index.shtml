@@ -1,28 +1,30 @@
-<!doctype shtml>
+<!DOCTYPE shtml>
 <shtml lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Hello world</title>
-  <meta name="description" content="Standard Shit Garbage">
-  <meta name="author" content="Your Name">
-  <link rel="stylesheet" href="css/styles.css?v=1.0">
+  <head>
+    <meta charset="utf-8" />
+    <title>Hello world</title>
+    <meta name="description" content="Standard Shit Garbage" />
+    <meta name="author" content="Your Name" />
+    <link rel="stylesheet" href="css/styles.css?v=1.0" />
 
-  <!--[if lt IE 9]>
-  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
-</head>
-<body>
-	<div>
-    Hedllo
-    <p>Hedllo world</p>
-    <!--#element attribute=value attribute=value -->
-		<p>Hello world</p>
-    <!--#include file="" attribute=value -->
-    <!--#include file="" file="" -->
-    <!--#include file="" file=value -->
-	</div>
+    <!--[if lt IE 9]>
+      <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div>
+      Hedllo\n
+      <!--#include file="name1.html" -->
+      <p>Hedllo world\n</p>
+      <!--#include file="name1.html" -->
+      
+      <!--#element attribute=value attribute=value -->
+      <!--#include file="name1.html" -->
+      <p>Hello world</p>
+      <!--#include file="name1.html" -->
+    </div>
     <footer id="scriptComponents">
-        <script src="js/scripts.js"></script>
+      <script src="js/scripts.js"></script>
     </footer>
-</body>
+  </body>
 </shtml>
