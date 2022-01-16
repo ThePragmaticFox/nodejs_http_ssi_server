@@ -21,6 +21,15 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
 
     if (port === PORT_DEFAULT && root === ROOT_DEFAULT) {
         console.log("No inputs specified, defaults will be used: (port = %s, root = %s)", port, rootAbs);
+    } else {
+        console.log("The following inputs will be used: (port = %s, root = %s)", port, rootAbs);
+    }
+
+    try {
+        fs.accessSync(rootAbs);
+    } catch (err) {
+        console.log("Error: Root directory could not be accessed (is it a valid absolute path?): %s", rootAbs);
+        return;
     }
 
     const shtmlFilter = "/*.shtml";
@@ -43,6 +52,13 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
         const shtmlFileRelPath = req.baseUrl;
         const shtmlFileDir = rootAbs + path.dirname(shtmlFileRelPath);
         const shtmlFileAbsPath = rootAbs + shtmlFileRelPath;
+
+        const debug = false;
+        if (debug) {
+            console.log(shtmlFileRelPath);
+            console.log(shtmlFileDir);
+            console.log(shtmlFileAbsPath);
+        }
 
         try {
             fs.accessSync(shtmlFileAbsPath);
@@ -89,7 +105,7 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
             const attributes = shtmlFileString.substring(beginAttr, endAttr).split(" ").map((attribute) => attribute.split("="));
 
             if (attributes.length != 1) {
-                // As per requirement, only a single attribute (file) is allowed.
+                // As per (my interpretation of the) requirement, only a single attribute (file) is allowed.
                 console.log("Error: Only a single file attribute is allowed per directive, but given are %s.", attributes.length);
                 console.trace();
                 isSuccessful = false;
@@ -121,8 +137,7 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
             return false;
         }
 
-        // We only check for double quotes, i.e. a more strict parsing.
-        const attrPath = attribute[1].replace(/(^"|"$)/g, "");
+        const attrPath = attribute[1].replace(/(^"|"$)/g, "").replace(/(^'|'$)/g, "");
 
         if (path.isAbsolute(attrPath)) {
             console.log("Error: Only paths relative and contained to the folder with the currently parsed .shtml file are allowed, but the specified path is absolute: %s", attrPath);
