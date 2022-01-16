@@ -6,5 +6,31 @@
     "filereader": "^0.10.3",
     "morgan": "^1.10.0",
     "node-fetch": "^3.1.0"
-  }
+  },
+  "name": "nodejs_http_ssi_server",
+  "description": "A simple node.js http server built on top of express.js  providing a simplified SSI Include functionality for .shtml files.",
+  "version": "1.0.0",
+  "main": "main.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThePragmaticFox/nodejs_http_ssi_server.git"
+  },
+  "keywords": [
+    "node.js",
+    "express.js",
+    "webserver",
+    "html",
+    "ssi",
+    "include"
+  ],
+  "author": "The Pragmatic Fox",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ThePragmaticFox/nodejs_http_ssi_server/issues"
+  },
+  "homepage": "https://github.com/ThePragmaticFox/nodejs_http_ssi_server#readme"
 }

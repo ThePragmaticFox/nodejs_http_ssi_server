@@ -1,15 +1,17 @@
 "use strict";
 
-var fs = require("fs");
-var path = require("path");
-var express = require("express");
+const fs = require("fs");
+const path = require("path");
+const express = require("express");
+
+console.log(process.argv);
 
 const port = 80;
 
 var inputRoot = "/www";
 
-if (!inputRoot.endsWith("/")) {
-    inputRoot += "/";
+if (inputRoot.endsWith("/")) {
+    inputRoot = inputRoot.slice(0, -1);
 }
 
 const rootRel = inputRoot;
@@ -20,60 +22,37 @@ const illegalPathTerm = "../";
 const includeSSIPatternBegin = "<!--#include ";
 const includeSSIPatternEnd = " -->";
 
-const app = express();
-
-function parseAttribute(attribute, resultSHTML) {
-
-    if (attribute[0] != "file") {
-        console.log("Error: The only allowed attribute is 'file', but the specified attribute is '%s'", attribute[0]);
-        return false;
-    }
-
-    const attrPath = attribute[1].replace(/(^"|"$)/g, "");
-
-    if (path.isAbsolute(attrPath)) {
-        console.log("Error: Only relative paths inside the root directory are allowed, but the specified path is absolute: %s", attrPath);
-        if (attrPath[0] === "/") {
-            console.log("Tip: Instead of '/', use './' or '' (empty string) at the beginning of the path.");
-        }
-        return false;
-    }
-
-    if (attrPath.includes(illegalPathTerm)) {
-        console.log("Error: The term '%s' is not allowed in the specified path: %s", illegalPathTerm, attrPath);
-        return false;
-    }
-
-    const attributeFilePath = rootAbs + attrPath;
-    
-    try {
-        fs.accessSync(attributeFilePath);
-    } catch (err) {
-        console.log("Error: The file of the specified relative path could not be accessed (does it exist?): %s", attrPath);
-        console.log("Absolute Path: %s", attributeFilePath);
-        return false;
-    }
-
-    try {
-        const attributeFileString = fs.readFileSync(attributeFilePath, shtmlEncoding);
-        resultSHTML.push(attributeFileString);
-    } catch (err) {
-        console.log("Error: The file of the specified relative path could not be parsed (is it 'utf-8' enconded?): %s", attrPath);
-        console.log("Absolute Path: %s", attributeFilePath);
-        return false;
-    }
-
-    return true;
+function main() {
+    const app = express();
+    app.use(shtmlFilter, middlewareSSI);
+    app.use(express.static(rootAbs));
+    console.log("Server successfully started.");
+    app.listen(process.env.PORT || port);
 }
 
-app.use(shtmlFilter, (req, res, next) => {
+function middlewareSSI(req, res, next) {
 
-    var resultSHTML = [];
+    const resultSHTML = [];
     var isSuccessful = true;
 
     const shtmlFileRelPath = req.baseUrl;
-    const shtmlFilePath = rootAbs + shtmlFileRelPath;
-    const shtmlFileString = fs.readFileSync(shtmlFilePath, shtmlEncoding);
+    const shtmlFileDir = rootAbs + path.dirname(shtmlFileRelPath);
+    const shtmlFileAbsPath = rootAbs + shtmlFileRelPath;
+
+    try {
+        fs.accessSync(shtmlFileAbsPath);
+    } catch (err) {
+        console.log("Error: Could not access requested file: %s", shtmlFileAbsPath);
+    }
+
+    var shtmlFileString;
+    try {
+        shtmlFileString = fs.readFileSync(shtmlFileAbsPath, shtmlEncoding);
+    } catch(err) {
+        console.log("Error: Could not read requested file: %s", shtmlFileAbsPath);
+        next();
+        return;
+    }
 
     for (let i = 0; i < shtmlFileString.length; i++) {
 
@@ -97,6 +76,7 @@ app.use(shtmlFilter, (req, res, next) => {
 
         if (j >= shtmlFileString.length) {
             console.log("Error: The closing of an opened SSI directive could not be found. Maybe you forgot a space?");
+            console.trace();
             isSuccessful = false;
             break;
         }
@@ -106,11 +86,12 @@ app.use(shtmlFilter, (req, res, next) => {
         if (attributes.length != 1) {
             // As per requirement, only a single attribute (file) is allowed.
             console.log("Error: Only a single file attribute is allowed per directive, but given are %s.", attributes.length);
+            console.trace();
             isSuccessful = false;
             break;
         }
 
-        if (!parseAttribute(attributes[0], resultSHTML)) {
+        if (!parseAttribute(attributes[0], resultSHTML, shtmlFileDir, shtmlFileAbsPath)) {
             isSuccessful = false;
             break;
         }
@@ -119,12 +100,63 @@ app.use(shtmlFilter, (req, res, next) => {
     }
 
     if (isSuccessful) {
+        console.log("Success: '%s' served as .shtml file.", shtmlFileAbsPath);
         res.send(resultSHTML.join(""));
     } else {
-        console.log("Abort: '%s' served as .html file.", shtmlFileRelPath);
+        console.log("Abort: '%s' served as .html file.", shtmlFileAbsPath);
         next();
     }
-});
+}
 
-app.use(express.static(rootAbs));
-app.listen(process.env.PORT || port);
+function parseAttribute(attribute, resultSHTML, shtmlFileDir, shtmlFileAbsPath) {
+
+    if (attribute[0] !== "file") {
+        console.log("Error: The only allowed attribute is 'file', but the specified attribute is '%s'", attribute[0]);
+        console.trace();
+        return false;
+    }
+
+    // We only check for double quotes, i.e. a more strict parsing.
+    const attrPath = attribute[1].replace(/(^"|"$)/g, "");
+
+    if (path.isAbsolute(attrPath)) {
+        console.log("Error: Only paths relative and contained to the folder with the currently parsed .shtml file are allowed, but the specified path is absolute: %s", attrPath);
+        console.log("Information: currently parsed .shtml file: %s", shtmlFileAbsPath);
+        if (attrPath.length > 0 && attrPath[0] === "/") {
+            console.log("Tip: Instead of '/', use './' or '' (empty string) at the beginning of the path.");
+        }
+        console.trace();
+        return false;
+    }
+
+    if (attrPath.includes(illegalPathTerm)) {
+        console.log("Error: The term '%s' is not allowed in the specified path: %s", illegalPathTerm, attrPath);
+        console.trace();
+        return false;
+    }
+
+    const attributeFilePath = shtmlFileDir + "/" + attrPath;
+    
+    try {
+        fs.accessSync(attributeFilePath);
+    } catch (err) {
+        console.log("Error: The file of the specified relative path could not be accessed (does it exist?): %s", attrPath);
+        console.log("Absolute Path: %s", attributeFilePath);
+        console.trace();
+        return false;
+    }
+
+    try {
+        const attributeFileString = fs.readFileSync(attributeFilePath, shtmlEncoding);
+        resultSHTML.push(attributeFileString);
+    } catch (err) {
+        console.log("Error: The file of the specified relative path could not be parsed (is it 'utf-8' enconded?): %s", attrPath);
+        console.log("Absolute Path: %s", attributeFilePath);
+        console.trace();
+        return false;
+    }
+
+    return true;
+}
+
+main();
