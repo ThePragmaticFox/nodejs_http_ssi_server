@@ -13,7 +13,7 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
         root = root.slice(0, -1);
     }
 
-    var rootAbs = __dirname + root;
+    var rootAbs = __dirname.replace("/node_modules/nodejs_http_ssi_server", "") + root;
 
     if (root !== ROOT_DEFAULT) {
         rootAbs = root;
