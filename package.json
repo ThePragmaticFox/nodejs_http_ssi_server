@@ -9,7 +9,7 @@
   },
   "name": "nodejs_http_ssi_server",
   "description": "A simple node.js http server built on top of express.js  providing a simplified SSI Include functionality for .shtml files.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "main.js",
   "devDependencies": {},
   "scripts": {
