@@ -13,7 +13,8 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
         root = root.slice(0, -1);
     }
 
-    var rootAbs = __dirname.replace("/node_modules/nodejs_http_ssi_server", "") + root;
+    const rootParent = __dirname.replace("/node_modules/nodejs_http_ssi_server", "");
+    var rootAbs = rootParent + root;
 
     if (root !== ROOT_DEFAULT) {
         rootAbs = root;
@@ -29,7 +30,17 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
         fs.accessSync(rootAbs);
     } catch (err) {
         console.log("Error: Root directory could not be accessed (is it a valid absolute path?): %s", rootAbs);
-        return;
+        if (root != ROOT_DEFAULT) {
+            return;
+        }
+        try {
+            rootAbs = rootParent + "/";
+            console.log("Fallback default root directory will be used: %s", rootAbs);
+            fs.accessSync(rootAbs);
+        } catch (err) {
+            console.log("Error: Fallback default root directory could not be accessed: %s", rootAbs);
+            return;
+        }
     }
 
     const shtmlFilter = "/*.shtml";
