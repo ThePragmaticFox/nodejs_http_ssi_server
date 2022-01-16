@@ -17,7 +17,7 @@ server(port, root);
 
 Defaults are (port = 3000, root = "/www").
 
-Note that the default root is relative to the "node_modules" folder, so it assumes a "www" directory in the same parent directory as the "node_modules" directory. If "/www" does not exist, it defaults to "/".
+Note that the default root is relative to the "node_modules" folder, so it assumes a "www" directory in the same parent directory as the "node_modules" directory. If the relative path of "/www" does not exist, it defaults to the relative path of "/".
 
 .shtml SSI include directives (SGML comments) have the following format:
 
