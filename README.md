@@ -6,7 +6,7 @@
 npm install nodejs_http_ssi_server
 ```
 
-(please use only the newest version, i.e. 1.0.4 and up)
+(please only use the newest version, i.e. 1.0.4 and up)
 
 ## Usage example
 
@@ -17,7 +17,7 @@ server(port, root);
 
 Defaults are (port = 3000, root = "./www").
 
-.shtml SSI include directives have the following format:
+.shtml SSI include directives (SGML comments) have the following format:
 
 ```
 <!--#include file="path" --> 
