@@ -35,6 +35,8 @@ This minimal (server side rendering for static html) webserver is based on expre
 
 The implementation is based on node.js and express.js. This allows us to only care about the middleware layer, i.e. fetching /\*.shtml pages to parse for the SSI "include" directive and replace it with the specified file attribute given as path. The decision was made to use synchronous functions for file I/O, as we need to wait for reading .shtml files and the attribute files to replace the "include" directive (if any) anyway, while using asynchronous file I/O would have resulted in unnecessary nesting. However, this point can be improved upon in the future. While the parsing loop does its job sufficiently quickly, it could absolutely be refactored into something more simple, making use of (potentially functional) common JavaScript language constructs. Another low-hanging fruit would be to (at least partially) generalise the directive parser for future extensions. Lastly, the logging is very rudimentary and can be generalised as well.
 
+## Statement
+
 Apart from very common lookup of minimal code fragments, no significant amount of code has been copied from anywhere. Except for the imported libraries, the source code seen in this repository is written by me.
  
 
