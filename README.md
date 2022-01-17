@@ -25,7 +25,7 @@ Note that the default root is relative to the "node_modules" folder, so it assum
 <!--#include file="path" --> 
 ```
 
-i.e. only a single file is parsed per directive. A path can be specified with double, single or without quotes. That being the exception, the parsing is quite strict otherwise. The path must be relative and contained in the directory of the current .shtml document that is being parsed. Additionally, the pattern "../" is not allowed in the path for simplicity reasons.
+i.e. only a single file is parsed per directive. A path can be specified with double, single or without quotes. That being the exception, the parsing is quite strict otherwise. The path must be relative and contained in the directory of the current .shtml document that is being parsed. Additionally, the pattern "../" is not allowed in the path for simplicity reasons. Due to time constraints, spaces are also not allowed in the path.
 
 ## Important Note
 
