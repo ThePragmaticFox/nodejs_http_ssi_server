@@ -88,7 +88,11 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
         var isSuccessful = true;
 
         const resultSHTML = [];
-        const includeSSIRegex = new RegExp(includeSSIPatternBegin + "[0-9\/\'\"=.a-zA-Z]+" + includeSSIPatternEnd, "g");
+        const includeSSIRegex = new RegExp(includeSSIPatternBegin + "[^ ]+" + includeSSIPatternEnd, "g");
+        
+        if (debug) {
+            console.log(shtmlFileString.match(includeSSIRegex))
+        }
 
         while ((includeSSIMatch = includeSSIRegex.exec(shtmlFileString)) != null) {
 
