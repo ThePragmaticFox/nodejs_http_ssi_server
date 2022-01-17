@@ -54,11 +54,8 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
     app.use(express.static(rootAbs));
     console.log("Server successfully started.");
     app.listen(process.env.PORT || port);
-        
-    function middlewareSSI(req, res, next) {
 
-        const resultSHTML = [];
-        var isSuccessful = true;
+    function middlewareSSI(req, res, next) {
 
         const shtmlFileRelPath = req.baseUrl;
         const shtmlFileDir = rootAbs + path.dirname(shtmlFileRelPath);
@@ -80,40 +77,26 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
         var shtmlFileString;
         try {
             shtmlFileString = fs.readFileSync(shtmlFileAbsPath, shtmlEncoding);
-        } catch(err) {
+        } catch (err) {
             console.log("Error: Could not read requested file: %s", shtmlFileAbsPath);
             next();
             return;
         }
 
-        for (let i = 0; i < shtmlFileString.length; i++) {
+        var lastIndex = 0;
+        var includeSSIMatch;
+        var isSuccessful = true;
 
-            while (i < shtmlFileString.length && !shtmlFileString.startsWith(includeSSIPatternBegin, i)) {
-                resultSHTML.push(shtmlFileString[i++]);
-            }
+        const resultSHTML = [];
+        const includeSSIRegex = /<!--#include [0-9\/'"=.a-zA-Z]+ -->/g;
 
-            if (i >= shtmlFileString.length) {
-                break;
-            }
+        while ((includeSSIMatch = includeSSIRegex.exec(shtmlFileString)) != null) {
 
-            const beginAttr = i + includeSSIPatternBegin.length;
+            resultSHTML.push(shtmlFileString.substring(lastIndex, includeSSIMatch.index));
 
-            let j = beginAttr;
-
-            while (j < shtmlFileString.length && !shtmlFileString.startsWith(includeSSIPatternEnd, j)) {
-                j++;
-            }
-
-            const endAttr = j;
-
-            if (j >= shtmlFileString.length) {
-                console.log("Error: The closing of an opened SSI directive could not be found. Maybe you forgot a space?");
-                console.trace();
-                isSuccessful = false;
-                break;
-            }
-
-            const attributes = shtmlFileString.substring(beginAttr, endAttr).split(" ").map((attribute) => attribute.split("="));
+            const match = includeSSIMatch[0];
+            const cleanedMatch = match.replace(includeSSIPatternBegin, "").replace(includeSSIPatternEnd, "");
+            const attributes = cleanedMatch.split(" ").map(attribute => attribute.split("="));
 
             if (attributes.length != 1) {
                 // As per (my interpretation of the) requirement, only a single attribute (file) is allowed.
@@ -128,11 +111,12 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
                 break;
             }
 
-            i = endAttr + includeSSIPatternEnd.length;
+            lastIndex = includeSSIMatch.index + match.length;
         }
 
         if (isSuccessful) {
             console.log("Success: '%s' served as .shtml file.", shtmlFileAbsPath);
+            resultSHTML.push(shtmlFileString.substring(lastIndex));
             res.send(resultSHTML.join(""));
         } else {
             console.log("Abort: '%s' served as .html file.", shtmlFileAbsPath);
@@ -167,7 +151,7 @@ module.exports = function (port = PORT_DEFAULT, root = ROOT_DEFAULT) {
         }
 
         const attributeFilePath = shtmlFileDir + "/" + attrPath;
-        
+
         try {
             fs.accessSync(attributeFilePath);
         } catch (err) {
