@@ -6,7 +6,7 @@
 npm install nodejs_http_ssi_server
 ```
 
-(please only use the newest version, i.e. 1.1.0 and up)
+(please only use the newest version, i.e. 1.1.2 and up)
 
 ## Usage example
 
